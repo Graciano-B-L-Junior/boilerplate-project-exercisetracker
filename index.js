@@ -50,13 +50,17 @@ app.post("/api/users",async function(req,res){
 app.get("/api/users",async function(req,res){
   let users = await Users.find()
   let array_users = []
-  users.forEach((data)=>{
-    array_users.push({
-      name:data.name,
-      _id:data.id
+  try{
+    users.forEach((data)=>{
+      array_users.push({
+        name:data.name,
+        _id:data.id
+      })
     })
-  })
-  res.json(array_users)
+    res.json(array_users)
+  }catch(e){
+    res.json(e)
+  }
 })
 
 
