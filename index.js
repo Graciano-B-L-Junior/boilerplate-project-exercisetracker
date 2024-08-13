@@ -75,15 +75,25 @@ app.post("/api/users/:_id/exercises",async function(req,res){
   let date = new Date(req.body.date)
   try{
     const user = await Users.findById(_id)
-    const exercise = await Exercise({
+    // const exercise = await Exercise({
+    //   _id: user.id,
+    //   username: user.name,
+    //   date: date.toDateString(),
+    //   duration: duration,
+    //   description: description,
+    // })
+    user['date'] = date.toDateString()
+    user['duration'] = duration
+    user['description'] = description
+    user.save()
+    
+    res.json({
       _id: user.id,
       username: user.name,
       date: date.toDateString(),
       duration: duration,
       description: description,
-    })
-    exercise.save()
-    res.json(exercise)
+  })
   }
   catch(e){
     res.json(e)
