@@ -31,7 +31,9 @@ const Exercise = mongoose.model('exercise',ExerciseSchema)
 
 const Users = mongoose.model('username',userSchema)
 
-Users.deleteMany({})
+Users.deleteMany({}).then((result)=>{
+  console.log('All documents deleted:', result);
+})
 
 app.use(express.json())
 app.use(express.urlencoded({extended : true}))
