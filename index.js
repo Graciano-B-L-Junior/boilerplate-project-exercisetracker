@@ -61,7 +61,7 @@ app.get("/api/users",async function(req,res){
         _id:data.id
       })
     })
-    res.json(array_users)
+    res.send(array_users)
   }catch(e){
     res.json(e)
   }
