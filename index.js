@@ -87,8 +87,7 @@ app.post("/api/users/:_id/exercises",async function(req,res){
         "duration": duration,
         "description": description,
       }
-    const user = await Users.findByIdAndUpdate(_id, {$set: new_fields}, { new: true, runValidators: true })
-    console.log(user)
+    const user = await Users.updateOne({id:_id},new_fields,)
     res.json(user)
   }
   catch(e){
