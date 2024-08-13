@@ -31,6 +31,8 @@ const Exercise = mongoose.model('exercise',ExerciseSchema)
 
 const Users = mongoose.model('username',userSchema)
 
+Users.deleteMany({})
+
 app.use(express.json())
 app.use(express.urlencoded({extended : true}))
 app.use(cors())
