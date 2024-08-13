@@ -76,27 +76,50 @@ app.post("/api/users/:_id/exercises",async function(req,res){
   let _id = req.params._id
   const {description,duration,date} = req.body
   try{
-    const user = Users.findById(_id)
-    if(!user){
-      res.send("Could not found user")
-    }
-    else{
-      const exercise = await Exercise({
-          user_id: user.id,
-          username: user.name,
-          date: date ? new Date(date) : new Date(),
-          duration: duration,
-          description: description,
-        })
-      await exercise.save()
-      res.json({
-        _id: user._id,
-        username: user.name,
-        date: new Date(exercise.date).toDateString(),
-        duration: exercise.duration,
-        description: exercise.description,
-      })
-    }
+     // const _id = req.body[":_id"];
+     const _id = req.params._id;
+     const foundUser = await Users.findOne({
+         "_id": _id
+     })
+     if (!foundUser) return res.status(404).json({ "message": `User with id ${_id} not found` })
+     const { username } = foundUser
+     const { description, duration, date } = req.body;
+     const newExercise = {
+         "userId": _id,
+         "date": date ? new Date(date).toDateString() : new Date().toDateString(),
+         "duration": duration,
+         "description": description,            
+     }
+     const created = await Exercise.create(newExercise);
+     const exercise = {
+         "username": username,
+         "description": created.description,
+         "duration": created.duration,
+         "date": created.date,         
+         "_id": _id,
+     }
+     res.status(201).json(exercise);
+    // const user = Users.findById(_id)
+    // if(!user){
+    //   res.send("Could not found user")
+    // }
+    // else{
+    //   const exercise = await Exercise({
+    //       user_id: user.id,
+    //       username: user.name,
+    //       date: date ? new Date(date) : new Date(),
+    //       duration: duration,
+    //       description: description,
+    //     })
+    //   await exercise.save()
+    //   res.json({
+    //     _id: user._id,
+    //     username: user.name,
+    //     date: new Date(exercise.date).toDateString(),
+    //     duration: exercise.duration,
+    //     description: exercise.description,
+    //   })
+    // }
   }
   catch(e){
     console.log("oi")
