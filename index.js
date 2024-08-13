@@ -61,7 +61,6 @@ app.get("/api/users",async function(req,res){
         _id:data.id
       })
     })
-    console.log(users)
     res.json(users)
   }catch(e){
     res.json(e)
@@ -96,6 +95,8 @@ app.post("/api/users/:_id/exercises",async function(req,res){
     }
   }
   catch(e){
+    console.log("oi")
+    console.log(e)
     res.json(e)
   }
 })
