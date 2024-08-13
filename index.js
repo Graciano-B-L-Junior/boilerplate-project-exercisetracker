@@ -17,13 +17,13 @@ const ExerciseSchema = new Schema({
   description: String,
   duration: Number,
   date: String,
-  _id: String
+  user_id: String
 })
 
 const Log = new Schema({
   username: String,
   count: Number,
-  _id: String,
+  user_id: String,
   log: []
 })
 
@@ -33,6 +33,10 @@ const Users = mongoose.model('username',userSchema)
 
 Users.deleteMany({}).then((result)=>{
   console.log('All documents deleted:', result);
+})
+
+Exercise.deleteMany({}).then((result)=>{
+
 })
 
 app.use(express.json())
@@ -78,7 +82,7 @@ app.post("/api/users/:_id/exercises",async function(req,res){
     }
     else{
       const exercise = await Exercise({
-          _id: user.id,
+          user_id: user.id,
           username: user.name,
           date: date ? new Date(date) : new Date(),
           duration: duration,
