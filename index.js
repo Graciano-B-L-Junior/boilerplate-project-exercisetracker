@@ -73,8 +73,8 @@ app.get("/api/users",async function(req,res){
 
 
 app.post("/api/users/:_id/exercises",async function(req,res){
-  let _id = req.params._id
-  const {description,duration,date} = req.body
+  console.log(req.body)
+  console.log(req.params)
   try{
      // const _id = req.body[":_id"];
      const _id = req.params._id;
@@ -85,7 +85,7 @@ app.post("/api/users/:_id/exercises",async function(req,res){
      const { username } = foundUser
      const { description, duration, date } = req.body;
      const newExercise = {
-         "userId": _id,
+         "user_Id": _id,
          "date": date ? new Date(date).toDateString() : new Date().toDateString(),
          "duration": duration,
          "description": description,            
