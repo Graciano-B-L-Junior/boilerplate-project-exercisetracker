@@ -138,7 +138,7 @@ app.get("/api/users/:_id/logs", async function(req,res) {
   res.json({
     username:user.username,
     count: exercises.length,
-    _id:user._id,
+    _id:id,
     log:log
   })
 })
