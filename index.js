@@ -52,7 +52,7 @@ app.post("/api/users",async function(req,res){
 })
 
 app.get("/api/users",async function(req,res){
-  let users = await Users.find({}).select('_id name')
+  let users = await Users.find({}).select('_id username')
   let array_users = []
   try{
     users.forEach((data)=>{
