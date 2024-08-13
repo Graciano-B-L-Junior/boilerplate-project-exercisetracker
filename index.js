@@ -87,13 +87,7 @@ app.post("/api/users/:_id/exercises",async function(req,res){
     user['description'] = description
     user.save()
     
-    res.json({
-      _id: user.id,
-      username: user.name,
-      date: date.toDateString(),
-      duration: duration,
-      description: description,
-  })
+    res.json(user)
   }
   catch(e){
     res.json(e)
