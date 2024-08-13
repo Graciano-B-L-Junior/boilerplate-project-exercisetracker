@@ -71,25 +71,29 @@ app.get("/api/users",async function(req,res){
 
 app.post("/api/users/:_id/exercises",async function(req,res){
   let _id = req.params._id
-  let description = req.body.description
-  let duration = req.body.duration
-  let date = new Date(req.body.date)
+  const {description,duration,date} = req.body
   try{
-    const exercise = await Exercise({
+    const user = Users.findById(_id)
+    if(!user){
+      res.send("Could not found user")
+    }
+    else{
+      const exercise = await Exercise({
+          _id: user.id,
+          username: user.name,
+          date: date ? new Date(date) : new Date(),
+          duration: duration,
+          description: description,
+        })
+      await exercise.save()
+      res.json({
         _id: user.id,
         username: user.name,
-        date: date.toDateString(),
-        duration: duration,
-        description: description,
+        date: new Date(exercise.date).toDateString(),
+        duration: exercise.duration,
+        description: exercise.description,
       })
-    exercise.save()
-    res.json({
-      _id: user.id,
-      username: user.name,
-      date: new Date(exercise.date).toDateString(),
-      duration: exercise.duration,
-      description: exercise.description,
-    })
+    }
   }
   catch(e){
     res.json(e)
