@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
 
 app.post("/api/users",async function(req,res){
   let username = req.body.username
-  const user = await Users({name: username})
+  const user = await Users({username: username})
   user.save()
   res.json({username:user.name,_id:user.id})
 })
