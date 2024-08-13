@@ -90,7 +90,7 @@ app.post("/api/users/:_id/exercises",async function(req,res){
         })
       await exercise.save()
       res.json({
-        _id: user.id,
+        _id: user._id,
         username: user.name,
         date: new Date(exercise.date).toDateString(),
         duration: exercise.duration,
