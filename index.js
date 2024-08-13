@@ -20,13 +20,6 @@ const ExerciseSchema = new Schema({
   user_id: String
 })
 
-const Log = new Schema({
-  username: String,
-  count: Number,
-  user_id: String,
-  log: []
-})
-
 const Exercise = mongoose.model('exercise',ExerciseSchema)
 
 const Users = mongoose.model('username',userSchema)
@@ -129,41 +122,52 @@ app.post("/api/users/:_id/exercises",async function(req,res){
 })
 
 app.get("/api/users/:_id/logs", async function(req,res) {
-  const { from, to, limit} = req.query;
-  const id = req.params._id
-  const user = await Users.findById(id)
-  if(!user){
-    res.send("Could not find user")
-  }
-  let dateObj ={}
+  try {
+    const _id = req.params._id;
+    const {from, to, limit} = req.query
 
-  if(from){
-    dateObj["$gte"] = new Date(from)
-  }
-  if(to){
-    dateObj["$lte"] = new Date(to)
-  }
-  let filter = {
-    user_id:id
-  }
-  if(from || to){
-    filter.date = dateObj
-  }
+    const foundUser = await Users.findOne({
+        "_id": _id
+    })
 
-  const exercises = await Exercise.find(filter).limit(+limit ?? 500)
+    if (!foundUser) return res.status(404).json({ "message": `User with id ${_id} not found` })
+    const { username } = foundUser;
+    let exercises = await Exercise.find({
+        "user_id": _id,
+    });
 
-  const log = exercises.map(e => ({
-    description:e.description,
-    duration:e.duration,
-    date:e.date.toDateString()
-  }))
+    if (from) {
+        const fromDate = new Date(from);
+        exercises = exercises.filter(exercise => new Date(exercise.date) >= fromDate);
+    }
+    if (to) {
+        const toDate = new Date(to);
+        exercises = exercises.filter(exercise => new Date(exercise.date) <= toDate);
+    }
+    if (limit) {
+        exercises = exercises.splice(0, Number(limit));
+    }
+    let count = exercises.length;
 
-  res.json({
-    username:user.username,
-    count: exercises.length,
-    _id:id,
-    log:log
-  })
+    const exercisesList = exercises.map(exercise => {
+        return {
+            "description": exercise.description,
+            "duration": exercise.duration,
+            "date": exercise.date
+        }
+    })
+    return res.json({
+        "username": username,
+        "count": count,
+        "_id": _id,
+        "log": exercisesList
+    })
+} catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+        "message": "Server error"
+    })
+}
 })
 
 
