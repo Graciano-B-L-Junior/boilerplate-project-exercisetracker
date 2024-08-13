@@ -53,7 +53,7 @@ app.get("/api/users",async function(req,res){
   users.forEach((data)=>{
     array_users.push({
       name:data.name,
-      id:data.id
+      _id:data.id
     })
   })
   res.json(array_users)
