@@ -9,7 +9,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 const Schema = mongoose.Schema
 
 const userSchema = new Schema({
-  name: String,
+  username: String,
 });
 
 const ExerciseSchema = new Schema({
@@ -61,7 +61,8 @@ app.get("/api/users",async function(req,res){
         _id:data.id
       })
     })
-    res.send(users)
+    console.log(users)
+    res.json(users)
   }catch(e){
     res.json(e)
   }
