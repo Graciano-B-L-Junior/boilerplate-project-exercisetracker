@@ -109,7 +109,9 @@ app.get("/api/users/:_id/logs", async function(req,res) {
   const { from, to, limit} = req.query;
   const id = req.params._id
   const user = await Users.findById(id)
-
+  if(!user){
+    res.send("Could not find user")
+  }
   let dateObj ={}
 
   if(from){
