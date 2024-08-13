@@ -74,18 +74,20 @@ app.post("/api/users/:_id/exercises",async function(req,res){
   let duration = req.body.duration
   let date = new Date(req.body.date)
   try{
-    const user = await Users.findById(_id)
     // const exercise = await Exercise({
-    //   _id: user.id,
-    //   username: user.name,
-    //   date: date.toDateString(),
-    //   duration: duration,
-    //   description: description,
-    // })
-    user['date'] = date.toDateString()
-    user['duration'] = duration
-    user['description'] = description
-    user.save()
+      //   _id: user.id,
+      //   username: user.name,
+      //   date: date.toDateString(),
+      //   duration: duration,
+      //   description: description,
+      // })
+      const new_fields = 
+      {
+        date: date.toDateString(),
+        duration: duration,
+        description: description,
+      }
+    const user = await Users.findByIdAndUpdate(_id, new_fields, { new: true, runValidators: true })
     
     res.json(user)
   }
