@@ -61,7 +61,6 @@ app.get("/api/users",async function(req,res){
         _id:data.id
       })
     })
-    console.log(array_users)
     res.send(array_users)
   }catch(e){
     res.json(e)
@@ -75,21 +74,21 @@ app.post("/api/users/:_id/exercises",async function(req,res){
   let duration = req.body.duration
   let date = new Date(req.body.date)
   try{
-    // const exercise = await Exercise({
-      //   _id: user.id,
-      //   username: user.name,
-      //   date: date.toDateString(),
-      //   duration: duration,
-      //   description: description,
-      // })
-      const new_fields = 
-      {
-        "date": date.toDateString(),
-        "duration": duration,
-        "description": description,
-      }
-    const user = await Users.updateOne({id:_id},new_fields,)
-    res.json(user)
+    const exercise = await Exercise({
+        _id: user.id,
+        username: user.name,
+        date: date.toDateString(),
+        duration: duration,
+        description: description,
+      })
+    exercise.save()
+    res.json({
+      _id: user.id,
+      username: user.name,
+      date: new Date(exercise.date).toDateString(),
+      duration: exercise.duration,
+      description: exercise.description,
+    })
   }
   catch(e){
     res.json(e)
