@@ -36,143 +36,129 @@ app.use(express.json())
 app.use(express.urlencoded({extended : true}))
 app.use(cors())
 app.use(express.static('public'))
+//Middleware
+function logger(req, res, next){
+  console.log(req.method, req.path, req.params, req.query, req.body)
+  next()
+}
+app.use(logger)
+
+
+// Endpoints
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
 
-app.post("/api/users",async function(req,res){
-  let username = req.body.username
-  const user = await Users({username: username})
-  user.save()
-  res.json(user)
-})
-
-app.get("/api/users",async function(req,res){
-  let users = await Users.find({}).select('_id username')
-  let array_users = []
+app.get("/api/users", async(req, res) => {
   try{
-    users.forEach((data)=>{
-      array_users.push({
-        name:data.name,
-        _id:data.id
-      })
-    })
-    res.json(users)
-  }catch(e){
-    res.json(e)
+    return res.json( await User.find({}))
+
+  }catch(error){
+    console.error(error)
+    return res.json({error: "invalid"})
   }
 })
 
 
-app.post("/api/users/:_id/exercises",async function(req,res){
-  try{
-     // const _id = req.body[":_id"];
-     const _id = req.params._id;
-     const foundUser = await Users.findOne({
-         "_id": _id
-     })
-     if (!foundUser) return res.status(404).json({ "message": `User with id ${_id} not found` })
-     const { username } = foundUser
-     const { description, duration, date } = req.body;
-     const newExercise = {
-         "user_Id": _id,
-         "date": date ? new Date(date).toDateString() : new Date().toDateString(),
-         "duration": duration,
-         "description": description,            
-     }
-     const created = await Exercise.create(newExercise);
-     const user = {
-         "username": username,
-         "description": created.description,
-         "duration": created.duration,
-         "date": created.date,         
-         "_id": _id,
-     }
-     let updated_user = await Users.findByIdAndUpdate({_id:_id},{
-      $set: {"description": created.description,
-         "duration": created.duration,
-         "date": created.date,   }
-     },{new: true,upsert: true})
-     console.log(updated_user)
-     res.status(201).json(updated_user);
-    // const user = Users.findById(_id)
-    // if(!user){
-    //   res.send("Could not found user")
-    // }
-    // else{
-    //   const exercise = await Exercise({
-    //       user_id: user.id,
-    //       username: user.name,
-    //       date: date ? new Date(date) : new Date(),
-    //       duration: duration,
-    //       description: description,
-    //     })
-    //   await exercise.save()
-    //   res.json({
-    //     _id: user._id,
-    //     username: user.name,
-    //     date: new Date(exercise.date).toDateString(),
-    //     duration: exercise.duration,
-    //     description: exercise.description,
-    //   })
-    // }
-  }
-  catch(e){
-    console.log("oi")
-    console.log(e)
-    res.json(e)
-  }
-})
+app.post("/api/users", async(req, res)=>{
 
-app.get("/api/users/:_id/logs", async function(req,res) {
   try {
-    const _id = req.params._id;
-    const {from, to, limit} = req.query
-
-    const foundUser = await Users.findOne({
-        "_id": _id
-    })
-
-    if (!foundUser) return res.status(404).json({ "message": `User with id ${_id} not found` })
-    const { username } = foundUser;
-    let exercises = await Exercise.find({
-        "user_id": _id,
-    });
-
-    if (from) {
-        const fromDate = new Date(from);
-        exercises = exercises.filter(exercise => new Date(exercise.date) >= fromDate);
+    const existing = await User.findOne({username:req.body.username}).select({__v:0})
+    if (!existing) {
+      const newUser = await User.create({username:req.body.username})
+      return res.json({username:newUser.username, _id:newUser._id})
     }
-    if (to) {
-        const toDate = new Date(to);
-        exercises = exercises.filter(exercise => new Date(exercise.date) <= toDate);
-    }
-    if (limit) {
-        exercises = exercises.splice(0, Number(limit));
-    }
-    let count = exercises.length;
-
-    const exercisesList = exercises.map(exercise => {
-        return {
-            "description": exercise.description,
-            "duration": exercise.duration,
-            "date": exercise.date
-        }
-    })
-    const response = {
-      "username": username,
-      "count": count,
-      "_id": _id,
-      "log": exercisesList
+    return res.json({username:existing.username, _id:existing._id})
+  } catch (error) {
+    console.error(error)
+    return res.json({error:"Operation failed"})
   }
-    return res.json(response)
-} catch (error) {
-    console.log(error.message);
-    res.status(500).json({
-        "message": "Server error"
+
+})
+
+app.post("/api/users/:_id/exercises", async(req, res) =>{
+  try {
+    const user = await User.findById(req.body[":_id"] || req.params._id)
+    if (!user) return res.json({error:"user doesn't exist"})
+    const newExercise = await Exercise.create({
+      username:user.username,
+      description:req.body.description,
+      duration: req.body.duration, 
+      date: (req.body.date)? new Date(req.body.date) : new Date(),
+      })
+
+    return res.json({
+      _id:user._id,
+      username:user.username,
+      date: newExercise.date.toDateString(),
+      duration: newExercise.duration,
+      description:newExercise.description,
+
     })
-}
+  } catch (error) {
+    console.error(error)
+    return res.json({error:"Operation failed"})
+  }
+})
+
+// http://localhost:3000/api/users/65dc22ad6af64791b7fd8bad/logs?from=2024-01-30&to=2024-03-01
+// http://localhost:3000/api/users/65dc22ad6af64791b7fd8bad/logs?from=2024-01-30&to=2024-03-01&limit=2
+
+app.get("/api/users/:_id/logs", async(req, res)=>{
+  try {
+    let result = {}
+    let consultation = {}
+    let from = null
+    let to = null
+
+    const user = await User.findById(req.params._id)
+
+    consultation.username=user.username
+    result._id=user._id
+    result.username=user.username
+
+    if (req.query.from){
+      from = new Date (req.query.from+ "T00:00:00.000-06:00") 
+      consultation.date={...consultation.date, $gte:from}
+      result.from = from.toDateString()
+      // console.log(result.from)
+    }
+
+    if (req.query.to){
+      to = new Date (req.query.to+"T00:00:00.000-06:00")
+      consultation.date={...consultation.date, $lte:to}
+      result.to = to.toDateString()
+      // console.log(result.to)
+    }
+    console.log(consultation)
+
+    // const from = (req.query.from)? new Date(req.query.from) : null
+    // const to   = (req.query.to)? new Date(req.query.to)     : null
+    const log = await Exercise.find(consultation).limit(parseInt(req.query.limit)).select({_id:0, username:0, __v:0})
+
+    let pseudoLog = []
+
+    for(let entry of log){
+      pseudoLog.push({description:entry.description, duration:entry.duration, date:entry.date.toDateString()})
+    }
+
+    // console.log(copycat)
+
+    // console.log(log)
+    result.count=log.length
+    result.log=pseudoLog
+    // return res.json({_id:user._id, username:user.username, from:from.toDateString(), to:to.toDateString(), count:log.length, log:pseudoLog })
+    return res.json(result)
+
+  } catch (error) {
+    console.error(error)
+    return res.json({error:"Operation failed"})
+  }
+
+
+
+
 })
 
 
