@@ -66,8 +66,6 @@ app.get("/api/users",async function(req,res){
 
 
 app.post("/api/users/:_id/exercises",async function(req,res){
-  console.log(req.body)
-  console.log(req.params)
   try{
      // const _id = req.body[":_id"];
      const _id = req.params._id;
@@ -84,14 +82,14 @@ app.post("/api/users/:_id/exercises",async function(req,res){
          "description": description,            
      }
      const created = await Exercise.create(newExercise);
-     const exercise = {
+     const user = {
          "username": username,
          "description": created.description,
          "duration": created.duration,
          "date": created.date,         
          "_id": _id,
      }
-     res.status(201).json(exercise);
+     res.status(201).json(user);
     // const user = Users.findById(_id)
     // if(!user){
     //   res.send("Could not found user")
@@ -156,12 +154,14 @@ app.get("/api/users/:_id/logs", async function(req,res) {
             "date": exercise.date
         }
     })
-    return res.json({
-        "username": username,
-        "count": count,
-        "_id": _id,
-        "log": exercisesList
-    })
+    const response = {
+      "username": username,
+      "count": count,
+      "_id": _id,
+      "log": exercisesList
+  }
+    console.log(response)
+    return res.json(response)
 } catch (error) {
     console.log(error.message);
     res.status(500).json({
