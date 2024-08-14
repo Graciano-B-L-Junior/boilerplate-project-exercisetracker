@@ -119,14 +119,14 @@ app.get("/api/users/:_id/logs", async(req, res)=>{
     result.username=user.username
 
     if (req.query.from){
-      from = new Date (req.query.from+ "T00:00:00.000-06:00") 
+      from = new Date (req.query.from) 
       consultation.date={...consultation.date, $gte:from}
       result.from = from.toDateString()
       // console.log(result.from)
     }
 
     if (req.query.to){
-      to = new Date (req.query.to+"T00:00:00.000-06:00")
+      to = new Date (req.query.to)
       consultation.date={...consultation.date, $lte:to}
       result.to = to.toDateString()
       // console.log(result.to)
@@ -135,6 +135,10 @@ app.get("/api/users/:_id/logs", async(req, res)=>{
 
     // const from = (req.query.from)? new Date(req.query.from) : null
     // const to   = (req.query.to)? new Date(req.query.to)     : null
+    console.log("tem limit? "+req.query.limit)
+    if (req.query.limit == undefined){
+      console.log(parseInt(req.query.limit))
+    }
     const log = await Exercise.find(consultation).limit(parseInt(req.query.limit)).select({_id:0, username:0, __v:0})
 
     let pseudoLog = []
