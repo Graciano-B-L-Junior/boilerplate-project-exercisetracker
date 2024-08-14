@@ -89,7 +89,12 @@ app.post("/api/users/:_id/exercises",async function(req,res){
          "date": created.date,         
          "_id": _id,
      }
-     res.status(201).json(user);
+     let updated_user = Users.findByIdAndUpdate({_id:_id},{
+      $set: {"description": created.description,
+         "duration": created.duration,
+         "date": created.date,   }
+     },{new: true,upsert: true})
+     res.status(201).json(updated_user);
     // const user = Users.findById(_id)
     // if(!user){
     //   res.send("Could not found user")
