@@ -16,7 +16,7 @@ const ExerciseSchema = new Schema({
   username: String,
   description: String,
   duration: Number,
-  date: String,
+  date: Date,
   user_id: String
 })
 
@@ -65,10 +65,14 @@ app.get("/api/users", async(req, res) => {
 app.post("/api/users", async(req, res)=>{
 
   try {
+
     const existing = await User.findOne({username:req.body.username}).select({__v:0})
     if (!existing) {
       const newUser = await User.create({username:req.body.username})
-      return res.json({username:newUser.username, _id:newUser._id})
+      await newUser.save()
+      let username = newUser.username
+      let _id = newUser.id
+      return res.json({username, _id})
     }
     return res.json({username:existing.username, _id:existing._id})
   } catch (error) {
@@ -82,16 +86,22 @@ app.post("/api/users/:_id/exercises", async(req, res) =>{
   try {
     const user = await User.findById(req.body[":_id"] || req.params._id)
     if (!user) return res.json({error:"user doesn't exist"})
+    let dateObject = new Date()
+    if(req.body.date){
+      const dateString = req.body.date;
+      const [year, month, day] = dateString.split('-').map(Number);
+      dateObject = new Date(year, month - 1, day);
+    }
     let newExercise = await Exercise({
       username:user.username,
       description:req.body.description,
       duration: req.body.duration, 
-      date: (req.body.date)? new Date(req.body.date) : new Date(),
+      date: dateObject,
       })
 
     newExercise = await newExercise.save()
 
-    const _id = user._id
+    const _id = user.id
     const username = user.username
     
     console.log({
@@ -133,7 +143,9 @@ app.get("/api/users/:_id/logs", async(req, res)=>{
     result.username=user.username
 
     if (req.query.from){
-      from = new Date (req.query.from) 
+      const dateString = req.query.from;
+      const [year, month, day] = dateString.split('-').map(Number);
+      from = new Date(year, month - 1, day);
       consultation.date={...consultation.date, $gte:from}
       result.from = from.toDateString()
       // console.log(result.from)
@@ -141,11 +153,14 @@ app.get("/api/users/:_id/logs", async(req, res)=>{
 
     if (req.query.to){
       to = new Date (req.query.to)
+      const dateString = req.query.to;
+      const [year, month, day] = dateString.split('-').map(Number);
+      to = new Date(year, month - 1, day);
       consultation.date={...consultation.date, $lte:to}
       result.to = to.toDateString()
       // console.log(result.to)
     }
-    
+    console.log(consultation)
     const log = await Exercise.find(consultation).limit(parseInt(req.query.limit) == NaN? 1 : parseInt(req.query.limit)).select({_id:0, username:0, __v:0})
 
     let pseudoLog = []
@@ -153,6 +168,9 @@ app.get("/api/users/:_id/logs", async(req, res)=>{
     for(let entry of log){
       pseudoLog.push({description:entry.description, duration:entry.duration, date:new Date(entry.date).toDateString()})
     }
+
+    console.log(pseudoLog.length)
+    
 
     // console.log(copycat)
 
