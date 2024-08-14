@@ -95,11 +95,11 @@ app.post("/api/users/:_id/exercises", async(req, res) =>{
     const username = user.username
 
     return res.json({
-      _id,
       username,
-      date: new Date(newExercise.date).toDateString(),
-      duration: newExercise.duration,
       description:newExercise.description,
+      duration: newExercise.duration,
+      _id,
+      date: new Date(newExercise.date).toDateString(),
 
     })
   } catch (error) {
