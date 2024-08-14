@@ -79,37 +79,40 @@ app.post("/api/users", async(req, res)=>{
 })
 
 app.post("/api/users/:_id/exercises", async(req, res) =>{
-  let userId = req.params._id;
-  let description = req.body.description;
-  let duration = parseInt(req.body.duration);
-  let date = req.body.date 
-
-
   try {
-    const user = await User.findById(userId)
-    if (!user) {
-      return res.json({error: "unknown userId"})
-    } else {
-      const newExercise = await Exercise.create({
-        userId,
-        description,
-        duration,
-        date: date ? new Date(date) : new Date()
+    const user = await User.findById(req.body[":_id"] || req.params._id)
+    if (!user) return res.json({error:"user doesn't exist"})
+    let newExercise = await Exercise({
+      username:user.username,
+      description:req.body.description,
+      duration: req.body.duration, 
+      date: (req.body.date)? new Date(req.body.date) : new Date(),
       })
-      const exercise = await newExercise.save()
-      res.json({
-        _id: user._id,
-        username: user.username,
-        description: exercise.description,
-        duration: exercise.duration,
-        date: new Date(exercise.date).toDateString()
-      })
-    }
-  } catch (err) {
-    console.log(err)
-    res.json({
-      error: "something went wrong"
+
+    newExercise = await newExercise.save()
+
+    const _id = user._id
+    const username = user.username
+    
+    console.log({
+      username,
+      description:newExercise.description,
+      duration: newExercise.duration,
+      _id,
+      date: new Date(newExercise.date).toDateString(),
+
     })
+    return res.json({
+      username,
+      description:newExercise.description,
+      duration: newExercise.duration,
+      _id,
+      date: new Date(newExercise.date).toDateString(),
+
+    })
+  } catch (error) {
+    console.error(error)
+    return res.json({error:"Operation failed"})
   }
 })
 
