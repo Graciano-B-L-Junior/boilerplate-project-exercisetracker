@@ -140,7 +140,7 @@ app.get("/api/users/:_id/logs", async(req, res)=>{
     let pseudoLog = []
 
     for(let entry of log){
-      pseudoLog.push({description:entry.description, duration:entry.duration, date:entry.date.toDateString()})
+      pseudoLog.push({description:entry.description, duration:entry.duration, date:new Date(entry.date).toDateString()})
     }
 
     // console.log(copycat)
