@@ -22,9 +22,9 @@ const ExerciseSchema = new Schema({
 
 const Exercise = mongoose.model('exercise',ExerciseSchema)
 
-const Users = mongoose.model('username',userSchema)
+const User = mongoose.model('username',userSchema)
 
-Users.deleteMany({}).then((result)=>{
+User.deleteMany({}).then((result)=>{
   console.log('All documents deleted:', result);
 })
 
