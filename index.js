@@ -89,11 +89,12 @@ app.post("/api/users/:_id/exercises",async function(req,res){
          "date": created.date,         
          "_id": _id,
      }
-     let updated_user = Users.findByIdAndUpdate({_id:_id},{
+     let updated_user = await Users.findByIdAndUpdate({_id:_id},{
       $set: {"description": created.description,
          "duration": created.duration,
          "date": created.date,   }
      },{new: true,upsert: true})
+     console.log(updated_user)
      res.status(201).json(updated_user);
     // const user = Users.findById(_id)
     // if(!user){
@@ -165,7 +166,6 @@ app.get("/api/users/:_id/logs", async function(req,res) {
       "_id": _id,
       "log": exercisesList
   }
-    console.log(response)
     return res.json(response)
 } catch (error) {
     console.log(error.message);
