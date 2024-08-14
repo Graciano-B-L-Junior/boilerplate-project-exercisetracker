@@ -91,27 +91,22 @@ app.post("/api/users/:_id/exercises", async(req, res) =>{
 
     newExercise = await newExercise.save()
 
+    
+
     const _id = user.id
     const username = user.username
-    
-    console.log({
+
+
+    const user_obj ={
       username,
       description:newExercise.description,
       duration: newExercise.duration,
       _id,
       date: new Date(newExercise.date).toDateString(),
+    }
 
-    })
-    console.log(typeof newExercise.description)
-    console.log(typeof newExercise.duration)
-    return res.json({
-      username,
-      description:newExercise.description,
-      duration: parseInt(req.body.duration),
-      _id,
-      date: new Date(newExercise.date).toDateString(),
-
-    })
+    console.log()
+    return res.json(user_obj)
   } catch (error) {
     console.error(error)
     return res.json({error:"Operation failed"})
