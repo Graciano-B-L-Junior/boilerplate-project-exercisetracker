@@ -82,12 +82,14 @@ app.post("/api/users/:_id/exercises", async(req, res) =>{
   try {
     const user = await User.findById(req.body[":_id"] || req.params._id)
     if (!user) return res.json({error:"user doesn't exist"})
-    const newExercise = await Exercise.create({
+    let newExercise = await Exercise({
       username:user.username,
       description:req.body.description,
       duration: req.body.duration, 
       date: (req.body.date)? new Date(req.body.date) : new Date(),
       })
+
+    newExercise = await newExercise.save()
 
     return res.json({
       _id:user._id,
