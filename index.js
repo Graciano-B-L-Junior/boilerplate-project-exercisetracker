@@ -91,9 +91,19 @@ app.post("/api/users/:_id/exercises", async(req, res) =>{
 
     newExercise = await newExercise.save()
 
-    const _id = user._id
+    const _id = user.id
     const username = user.username
+    
+    console.log({
+      username,
+      description:newExercise.description,
+      duration: newExercise.duration,
+      _id,
+      date: new Date(newExercise.date).toDateString(),
 
+    })
+    console.log(typeof newExercise.description)
+    console.log(typeof newExercise.duration)
     return res.json({
       username,
       description:newExercise.description,
