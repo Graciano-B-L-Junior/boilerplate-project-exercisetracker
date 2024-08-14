@@ -39,6 +39,7 @@ app.use(express.static('public'))
 //Middleware
 function logger(req, res, next){
   console.log(req.method, req.path, req.params, req.query, req.body)
+  console.log('\n')
   next()
 }
 app.use(logger)
@@ -87,15 +88,19 @@ app.post("/api/users/:_id/exercises", async(req, res) =>{
       duration: req.body.duration, 
       date: (req.body.date)? new Date(req.body.date) : new Date(),
       })
-
-    return res.json({
+    console.log(JSON.stringify({
       _id:user._id,
       username:user.username,
       date: new Date(newExercise.date).toDateString(),
       duration: newExercise.duration,
       description:newExercise.description,
 
-    })
+    }))
+    user.date = new Date(newExercise.date).toDateString()
+    user.duration = newExercise.duration
+    user.description = newExercise.description
+    await user.save()
+    return res.json(user)
   } catch (error) {
     console.error(error)
     return res.json({error:"Operation failed"})
@@ -131,14 +136,7 @@ app.get("/api/users/:_id/logs", async(req, res)=>{
       result.to = to.toDateString()
       // console.log(result.to)
     }
-    console.log(consultation)
-
-    // const from = (req.query.from)? new Date(req.query.from) : null
-    // const to   = (req.query.to)? new Date(req.query.to)     : null
-    console.log("tem limit? "+req.query.limit)
-    if (req.query.limit == undefined){
-      console.log(parseInt(req.query.limit))
-    }
+    
     const log = await Exercise.find(consultation).limit(parseInt(req.query.limit) == NaN? 1 : parseInt(req.query.limit)).select({_id:0, username:0, __v:0})
 
     let pseudoLog = []
