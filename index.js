@@ -139,7 +139,7 @@ app.get("/api/users/:_id/logs", async(req, res)=>{
     if (req.query.limit == undefined){
       console.log(parseInt(req.query.limit))
     }
-    const log = await Exercise.find(consultation).limit(parseInt(req.query.limit)).select({_id:0, username:0, __v:0})
+    const log = await Exercise.find(consultation).limit(parseInt(req.query.limit) == NaN? 1 : parseInt(req.query.limit)).select({_id:0, username:0, __v:0})
 
     let pseudoLog = []
 
